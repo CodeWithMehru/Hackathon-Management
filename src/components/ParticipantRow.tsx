@@ -39,6 +39,7 @@ export function ParticipantRow({
         <StatusPill status={participant.status} />
         <ManageMenu
           disabled={busy}
+          currentStatus={participant.status}
           onAction={async (action) => {
             setBusy(true);
             try {

@@ -15,10 +15,10 @@ export default async function OrganizerLayout({
   if (!user) redirect("/login");
 
   return (
-    <div className="flex min-h-screen bg-[#f3f4f6]">
+    <div className="flex flex-col md:flex-row min-h-screen w-full bg-[#f3f4f6]">
       <Sidebar />
-      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
-        <div className="mx-auto w-full max-w-6xl flex-1 px-6 py-8">{children}</div>
+      <div className="flex-1 w-full overflow-y-auto p-4 md:p-8">
+        <div className="mx-auto w-full max-w-6xl">{children}</div>
       </div>
     </div>
   );

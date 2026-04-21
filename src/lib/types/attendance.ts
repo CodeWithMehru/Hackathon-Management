@@ -16,4 +16,4 @@ export type HackathonAttendanceRow = {
   attendance_logs: AttendanceLogs;
 };
 
-export type ManageAction = "CHECKIN" | "CHECKOUT";
+export type ManageAction = "CHECKIN" | "CHECKOUT" | "UNDO";

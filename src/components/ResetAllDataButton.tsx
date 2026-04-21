@@ -27,8 +27,9 @@ export function ResetAllDataButton() {
         alert(
           (json && "error" in json ? json.error : null) ?? "Reset failed"
         );
-        return;
       }
+      localStorage.removeItem("activeSession");
+      window.dispatchEvent(new Event("hackathon-active-session-changed"));
       router.refresh();
     } finally {
       setBusy(false);

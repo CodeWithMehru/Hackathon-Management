@@ -58,7 +58,8 @@ export async function POST(req: Request) {
       `You are a hackathon mentor. The theme is [${theme}]. ` +
       `Generate a JSON array of 20 completely unique, beginner-friendly project ideas using modern web tech. ` +
       `Schema: { "theme_meaning": "2 lines explaining the theme for social good/etc", "idea_title": "Project Name", ` +
-      `"description": "1 line explaining exactly how it works", "tech_stack": "Next.js, Tailwind, etc." }.`;
+      `"description": "1 line explaining exactly how it works", "tech_stack": "Next.js, Tailwind, etc." }.\n` +
+      `CRITICAL: YOU MUST RETURN EXACTLY 20 ITEMS. NO FEWER, NO MORE. ENSURE EVERY FIELD IS FILLED WITH TEXT.`;
 
     const completion = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
@@ -74,8 +75,7 @@ export async function POST(req: Request) {
       throw new Error("Groq returned an empty response.");
     }
 
-    const ideas = extractJsonArray(content)
-      .slice(0, 20)
+    let ideas = extractJsonArray(content)
       .map((item) => ({
         theme_name: theme,
         theme_meaning: String(item.theme_meaning ?? "").trim(),
@@ -98,6 +98,21 @@ export async function POST(req: Request) {
         { status: 500 }
       );
     }
+
+    let fallbackCount = 1;
+    while (ideas.length < 20) {
+      ideas.push({
+        theme_name: theme,
+        theme_meaning: "Exploring the fundamentals of " + theme + ".",
+        idea_title: "Innovative " + theme + " Solution " + fallbackCount,
+        description: "A beginner-friendly project designed to explore core " + theme + " concepts and practical real-world applications.",
+        tech_stack: "HTML, CSS, JavaScript",
+        is_taken: false,
+      });
+      fallbackCount++;
+    }
+
+    ideas = ideas.slice(0, 20);
 
     const { error } = await supabase.from("Theme_Ideas").insert(ideas);
     if (error) {

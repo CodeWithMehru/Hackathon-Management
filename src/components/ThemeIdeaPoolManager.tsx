@@ -6,7 +6,8 @@ import { useRouter } from "next/navigation";
 export function ThemeIdeaPoolManager() {
   const router = useRouter();
   const [theme, setTheme] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   async function generateIdeas() {
@@ -15,7 +16,7 @@ export function ThemeIdeaPoolManager() {
       return;
     }
 
-    setLoading(true);
+    setIsGenerating(true);
     setMessage(null);
     try {
       const res = await fetch("/api/admin/bulk-generate", {
@@ -39,7 +40,7 @@ export function ThemeIdeaPoolManager() {
       setMessage(`Generated and inserted ${json.inserted} ideas.`);
       router.refresh();
     } finally {
-      setLoading(false);
+      setIsGenerating(false);
     }
   }
 
@@ -48,7 +49,7 @@ export function ThemeIdeaPoolManager() {
       return;
     }
     
-    setLoading(true);
+    setIsResetting(true);
     setMessage(null);
     try {
       const res = await fetch("/api/admin/reset-ideas", { method: "POST" });
@@ -62,7 +63,7 @@ export function ThemeIdeaPoolManager() {
       setMessage("Idea pool reset successfully.");
       router.refresh();
     } finally {
-      setLoading(false);
+      setIsResetting(false);
     }
   }
 
@@ -81,23 +82,23 @@ export function ThemeIdeaPoolManager() {
           value={theme}
           onChange={(e) => setTheme(e.target.value)}
           placeholder="Enter hackathon theme..."
-          className="h-11 flex-1 rounded-lg border border-zinc-300 px-3 text-sm text-zinc-900 outline-none focus:border-[#194685] focus:ring-2 focus:ring-[#194685]/20"
+          className="flex-1 w-full px-4 py-3 text-base border rounded-md border-zinc-300 text-zinc-900 outline-none focus:border-[#194685] focus:ring-2 focus:ring-[#194685]/20"
         />
         <button
           type="button"
-          disabled={loading}
+          disabled={isGenerating || isResetting}
           onClick={() => void generateIdeas()}
           className="inline-flex h-11 items-center justify-center rounded-lg bg-[#194685] px-5 text-sm font-semibold text-white hover:bg-[#15386b] disabled:opacity-60"
         >
-          {loading ? "Generating..." : "Generate"}
+          {isGenerating ? "Generating..." : "Generate"}
         </button>
         <button
           type="button"
-          disabled={loading}
+          disabled={isGenerating || isResetting}
           onClick={() => void resetIdeas()}
           className="inline-flex h-11 items-center justify-center rounded-lg bg-red-600 px-5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
         >
-          {loading ? "Processing..." : "Reset"}
+          {isResetting ? "Processing..." : "Reset"}
         </button>
       </div>
 

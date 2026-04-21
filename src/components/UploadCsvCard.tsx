@@ -142,6 +142,7 @@ export function UploadCsvCard() {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [sessionInput, setSessionInput] = useState("");
+  const [activeSession, setActiveSessionState] = useState("");
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -149,7 +150,17 @@ export function UploadCsvCard() {
   const [lastCount, setLastCount] = useState<number | null>(null);
 
   useEffect(() => {
-    setSessionInput(getActiveSession());
+    const session = getActiveSession();
+    setSessionInput(session);
+    setActiveSessionState(session);
+    
+    const sync = () => {
+      const s = getActiveSession();
+      setSessionInput(s);
+      setActiveSessionState(s);
+    };
+    window.addEventListener("hackathon-active-session-changed", sync);
+    return () => window.removeEventListener("hackathon-active-session-changed", sync);
   }, []);
 
   const helper = useMemo(
@@ -167,13 +178,13 @@ export function UploadCsvCard() {
       return;
     }
     setActiveSession(name);
+    setActiveSessionState(name);
     setMessage(`Active session set to “${name}”.`);
   }
 
   async function importRows(rows: ParsedRegistrant[]) {
     const session = sessionInput.trim();
     if (!session) {
-      setMessage("Set a session name with + before importing.");
       return;
     }
 
@@ -280,6 +291,14 @@ export function UploadCsvCard() {
           Select CSV
         </button>
       </div>
+
+      {!activeSession && (
+        <div className="mb-6 mt-6 rounded-md border-l-4 border-red-500 bg-red-50 p-4">
+          <p className="font-bold text-red-700">
+            ⚠️ ACTION REQUIRED: You must set an Active Session Name in the box above and press '+' before uploading a CSV or checking in participants.
+          </p>
+        </div>
+      )}
 
       <input
         ref={inputRef}

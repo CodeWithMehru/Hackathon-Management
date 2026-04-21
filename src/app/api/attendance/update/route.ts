@@ -21,7 +21,7 @@ export async function POST(req: Request) {
     const action = body?.action;
     const session = body?.session?.trim() ?? "";
 
-    if (!id || !action || (action !== "CHECKIN" && action !== "CHECKOUT")) {
+    if (!id || !action || (action !== "CHECKIN" && action !== "CHECKOUT" && action !== "UNDO")) {
       return NextResponse.json(
         { error: "Missing id, action, or invalid action" },
         { status: 400 }
@@ -53,13 +53,21 @@ export async function POST(req: Request) {
       (existing.attendance_logs as AttendanceLogs | null | undefined) ?? {};
     const nextLogs: AttendanceLogs = { ...prev };
     const prevSession = nextLogs[session] ?? {};
-    nextLogs[session] =
-      action === "CHECKIN"
-        ? { ...prevSession, checkin: now }
-        : { ...prevSession, checkout: now };
+    
+    if (action === "CHECKIN") {
+      nextLogs[session] = { ...prevSession, checkin: now, checkout: null };
+    } else if (action === "CHECKOUT") {
+      nextLogs[session] = { ...prevSession, checkout: now };
+    } else if (action === "UNDO") {
+      nextLogs[session] = { ...prevSession, checkin: null, checkout: null };
+    }
 
     const status =
-      action === "CHECKIN" ? ("Checked In" as const) : ("Checked Out" as const);
+      action === "CHECKIN"
+        ? ("Checked In" as const)
+        : action === "CHECKOUT"
+        ? ("Checked Out" as const)
+        : ("Registered" as const);
 
     const { data, error } = await supabase
       .from("Hackathon_Attendance")

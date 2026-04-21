@@ -14,15 +14,15 @@ const nav = [
 export function Sidebar() {
   const pathname = usePathname();
   return (
-    <aside className="flex w-56 shrink-0 flex-col self-stretch border-r border-[#15386b] bg-[#194685] text-white md:w-64">
+    <aside className="flex w-full flex-col border-r border-[#15386b] bg-[#194685] text-white flex-shrink-0 md:w-64 md:min-h-screen">
       <div className="px-5 pb-6 pt-8">
         <Link href="/" className="block cursor-pointer text-3xl font-bold tracking-tight text-white">
           Hack Desk
         </Link>
       </div>
 
-      <nav className="flex flex-1 flex-col px-3 pb-8">
-        <div className="space-y-0.5">
+      <nav className="flex flex-1 px-3 pb-4 md:pb-8">
+        <div className="flex w-full flex-row gap-2 overflow-x-auto md:flex-col md:gap-0.5 md:overflow-visible">
           {nav.map((item) => {
             const Icon = item.icon;
             const isActive =
