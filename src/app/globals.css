@@ -1,0 +1,41 @@
+@import "tailwindcss";
+
+/* MLH-style dashboard: white surfaces, black text, MLH blue accents */
+:root {
+  color-scheme: light;
+  --background: #ffffff;
+  --foreground: #0a0a0a;
+  --surface: #ffffff;
+  --muted: rgba(0, 0, 0, 0.06);
+  --muted-2: rgba(0, 0, 0, 0.12);
+  --ring: rgba(25, 70, 133, 0.45);
+  --brand: #194685;
+  --brand-2: #15386b;
+  --sidebar: #194685;
+  --sidebar-2: #15386b;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-muted: var(--muted);
+  --color-muted2: var(--muted-2);
+  --color-ring: var(--ring);
+  --color-brand: var(--brand);
+  --color-brand2: var(--brand-2);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar2: var(--sidebar-2);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+* {
+  outline-color: var(--ring);
+}
