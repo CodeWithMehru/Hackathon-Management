@@ -32,6 +32,10 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: "upgrade-insecure-requests",
           },
+          {
+            key: "Permissions-Policy",
+            value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+          },
         ],
       },
     ];

@@ -15,7 +15,11 @@ export async function middleware(request: NextRequest) {
     pathname.includes("wp-admin") ||
     pathname.includes("wp-login") ||
     pathname.includes("config.json") ||
-    pathname.includes("config.yml")
+    pathname.includes("config.yml") ||
+    pathname.includes("server-status") ||
+    pathname.includes("status") ||
+    pathname.includes("nginx_status") ||
+    pathname.includes("metrics")
   ) {
     return new NextResponse("Forbidden", { status: 403 });
   }
