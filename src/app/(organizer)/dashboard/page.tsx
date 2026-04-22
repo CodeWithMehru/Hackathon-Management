@@ -1,6 +1,7 @@
 import { StatCard } from "@/components/StatCard";
 import { UploadCsvCard } from "@/components/UploadCsvCard";
 import { ResetAllDataButton } from "@/components/ResetAllDataButton";
+import { BroadcastMessageButton } from "@/components/BroadcastMessageButton";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -38,7 +39,10 @@ export default async function DashboardPage() {
             Import registrations and define the current session name for check-in.
           </p>
         </div>
-        <ResetAllDataButton />
+        <div className="flex items-center gap-3">
+          <BroadcastMessageButton />
+          <ResetAllDataButton />
+        </div>
       </div>
 
       {!hasData ? (
