@@ -8,7 +8,7 @@ async function getParticipants(): Promise<HackathonAttendanceRow[]> {
   const supabase = await createSupabaseServerClient();
   const { data, error } = await supabase
     .from("Hackathon_Attendance")
-    .select("id,name,email,status,attendance_logs")
+    .select("id,name,email,college,semester,roll_number,phone_number,status,attendance_logs")
     .order("name", { ascending: true });
 
   if (error) return [];

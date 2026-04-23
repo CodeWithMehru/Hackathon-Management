@@ -14,12 +14,13 @@ export async function POST(req: Request) {
     }
 
     const body = (await req.json().catch(() => null)) as
-      | { id: string; action: ManageAction; session: string }
+      | { id: string; action: ManageAction; session: string; roll_number?: string }
       | null;
 
     const id = body?.id;
     const action = body?.action;
     const session = body?.session?.trim() ?? "";
+    const roll_number = body?.roll_number?.trim();
 
     if (!id || !action || (action !== "CHECKIN" && action !== "CHECKOUT" && action !== "UNDO")) {
       return NextResponse.json(
@@ -69,14 +70,20 @@ export async function POST(req: Request) {
         ? ("Checked Out" as const)
         : ("Registered" as const);
 
+    const updatePayload: any = {
+      attendance_logs: nextLogs,
+      status,
+    };
+    
+    if (roll_number !== undefined) {
+      updatePayload.roll_number = roll_number;
+    }
+
     const { data, error } = await supabase
       .from("Hackathon_Attendance")
-      .update({
-        attendance_logs: nextLogs,
-        status,
-      })
+      .update(updatePayload)
       .eq("id", id)
-      .select("id,name,email,status,attendance_logs")
+      .select("id,name,email,phone_number,college,semester,roll_number,status,attendance_logs")
       .single();
 
     if (error) {

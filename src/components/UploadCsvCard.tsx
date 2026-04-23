@@ -7,19 +7,25 @@ import { Plus, Upload } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { getActiveSession, setActiveSession } from "@/lib/active-session";
 
-type ParsedRegistrant = { name: string; email: string };
+type ParsedRegistrant = { name: string; email: string; phone_number?: string; college?: string; semester?: string };
 
 function normalizeHeader(h: string) {
   return h.trim().toLowerCase().replace(/\s+/g, " ");
 }
 
-function scoreHeader(header: string, kind: "email" | "name") {
+function scoreHeader(header: string, kind: "email" | "name" | "phone" | "college" | "semester") {
   const h = normalizeHeader(header);
   if (kind === "email") {
     if (!h.includes("email")) return -1;
-  } else {
+  } else if (kind === "name") {
     if (!h.includes("name")) return -1;
     if (h.includes("email")) return 1;
+  } else if (kind === "phone") {
+    if (!h.includes("phone") && !h.includes("mobile") && !h.includes("whatsapp")) return -1;
+  } else if (kind === "college") {
+    if (!h.includes("college") && !h.includes("institution") && !h.includes("university")) return -1;
+  } else if (kind === "semester") {
+    if (!h.includes("semester") && !h.includes("term")) return -1;
   }
 
   let score = 10;
@@ -29,12 +35,23 @@ function scoreHeader(header: string, kind: "email" | "name") {
     if (h.includes("id")) score += 6;
     if (h.includes("participant")) score += 4;
     if (h.includes("primary")) score += 3;
-  } else {
+  } else if (kind === "name") {
     if (h === "name") score += 40;
     if (h.includes("full")) score += 10;
     if (h.includes("participant")) score += 4;
     if (h.includes("first")) score += 2;
     if (h.includes("last")) score += 2;
+  } else if (kind === "phone") {
+    if (h.includes("whatsapp")) score += 10;
+    if (h.includes("mobile")) score += 5;
+    if (h.includes("phone")) score += 5;
+  } else if (kind === "college") {
+    if (h.includes("institution")) score += 15;
+    if (h.includes("college")) score += 10;
+    if (h.includes("university")) score += 5;
+  } else if (kind === "semester") {
+    if (h.includes("semester")) score += 20;
+    if (h.includes("term")) score += 5;
   }
 
   if (h.includes("timestamp")) score -= 4;
@@ -42,7 +59,7 @@ function scoreHeader(header: string, kind: "email" | "name") {
   return score;
 }
 
-function pickFuzzyColumn(headers: string[], kind: "email" | "name") {
+function pickFuzzyColumn(headers: string[], kind: "email" | "name" | "phone" | "college" | "semester") {
   let best: { header: string; score: number } | null = null;
   for (const header of headers) {
     const score = scoreHeader(header, kind);
@@ -77,7 +94,7 @@ function parseCsvText(
   const parsed = Papa.parse<Record<string, unknown>>(text, {
     header: true,
     skipEmptyLines: true,
-    transformHeader: (h: string) => h.trim(),
+    transformHeader: (h: string) => h.replace(/^[\s\uFEFF\xA0]+|[\s\uFEFF\xA0]+$/g, ''),
   });
 
   if (parsed.errors?.length) {
@@ -95,6 +112,9 @@ function parseCsvText(
 
   const emailKey = pickFuzzyColumn(headers, "email");
   const nameKey = pickFuzzyColumn(headers, "name");
+  const phoneKey = pickFuzzyColumn(headers, "phone");
+  const collegeKey = pickFuzzyColumn(headers, "college");
+  const semesterKey = pickFuzzyColumn(headers, "semester");
 
   if (!emailKey) {
     return {
@@ -120,7 +140,31 @@ function parseCsvText(
       nameKey ? (r as Record<string, unknown>)[nameKey] : "",
       email
     );
-    rows.push({ name, email });
+    let phone_number = phoneKey ? String((r as Record<string, unknown>)[phoneKey] ?? "").trim() : "";
+    let college = collegeKey ? String((r as Record<string, unknown>)[collegeKey] ?? "").trim() : "";
+    let semester = semesterKey ? String((r as Record<string, unknown>)[semesterKey] ?? "").trim() : "";
+    
+    // Explicit hardcoded fallback for Google Forms exact headers just in case fuzzy fails
+    if (!college) {
+      const explicitCollege = (r as any)["Institution"] || (r as any)["Institution "] || (r as any)["college"];
+      if (explicitCollege) college = String(explicitCollege).trim();
+    }
+    if (!semester) {
+      const explicitSemester = (r as any)["Semester"] || (r as any)["Semester "] || (r as any)["semester"];
+      if (explicitSemester) semester = String(explicitSemester).trim();
+    }
+    if (!phone_number) {
+      const explicitPhone = (r as any)["Phone Number"] || (r as any)["Phone Number "] || (r as any)["phone_number"];
+      if (explicitPhone) phone_number = String(explicitPhone).trim();
+    }
+
+    rows.push({ 
+      name, 
+      email, 
+      phone_number: phone_number || undefined, 
+      college: college || undefined, 
+      semester: semester || undefined 
+    });
   }
 
   const seen = new Set<string>();

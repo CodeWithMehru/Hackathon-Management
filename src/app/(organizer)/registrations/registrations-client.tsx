@@ -24,6 +24,10 @@ export default function RegistrationsClient({
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newName, setNewName] = useState("");
   const [newEmail, setNewEmail] = useState("");
+  const [newCollege, setNewCollege] = useState("");
+  const [newSemester, setNewSemester] = useState("");
+  const [newPhone, setNewPhone] = useState("");
+  const [newRoll, setNewRoll] = useState("");
   const [addBusy, setAddBusy] = useState(false);
 
   useEffect(() => {
@@ -78,7 +82,7 @@ export default function RegistrationsClient({
     };
   }, []);
 
-  async function onManage(id: string, action: ManageAction) {
+  async function onManage(id: string, action: ManageAction, rollNumber?: string) {
     const session = getActiveSession();
     if (!session) {
       throw new Error("Set an active session name on the Dashboard before check-in.");
@@ -86,7 +90,7 @@ export default function RegistrationsClient({
     const res = await fetch("/api/attendance/update", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, action, session }),
+      body: JSON.stringify({ id, action, session, roll_number: rollNumber }),
     });
 
     const json = (await res.json().catch(() => null)) as
@@ -148,7 +152,14 @@ export default function RegistrationsClient({
       const res = await fetch("/api/admin/add-attendee", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: newName, email: newEmail }),
+        body: JSON.stringify({ 
+          name: newName, 
+          email: newEmail,
+          college: newCollege,
+          semester: newSemester,
+          phone_number: newPhone,
+          roll_number: newRoll
+        }),
       });
       const json = await res.json().catch(() => null);
       if (!res.ok || !json?.success) {
@@ -157,6 +168,10 @@ export default function RegistrationsClient({
       setIsModalOpen(false);
       setNewName("");
       setNewEmail("");
+      setNewCollege("");
+      setNewSemester("");
+      setNewPhone("");
+      setNewRoll("");
       alert("Attendee added successfully!");
       router.refresh();
     } catch (err: any) {
@@ -283,6 +298,56 @@ export default function RegistrationsClient({
                   onChange={(e) => setNewEmail(e.target.value)}
                   className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 focus:border-[#194685] focus:outline-none focus:ring-1 focus:ring-[#194685]"
                   placeholder="john@example.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-700">
+                  Institution (Required)
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newCollege}
+                  onChange={(e) => setNewCollege(e.target.value)}
+                  className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 focus:border-[#194685] focus:outline-none focus:ring-1 focus:ring-[#194685]"
+                  placeholder="e.g. Example University"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-700">
+                  Semester (Required)
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newSemester}
+                  onChange={(e) => setNewSemester(e.target.value)}
+                  className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 focus:border-[#194685] focus:outline-none focus:ring-1 focus:ring-[#194685]"
+                  placeholder="e.g. 5th"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-700">
+                  Phone Number (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={newPhone}
+                  onChange={(e) => setNewPhone(e.target.value)}
+                  className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 focus:border-[#194685] focus:outline-none focus:ring-1 focus:ring-[#194685]"
+                  placeholder="+91 9876543210"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-zinc-700">
+                  Roll Number (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={newRoll}
+                  onChange={(e) => setNewRoll(e.target.value)}
+                  className="mt-1 w-full rounded-md border border-zinc-300 px-3 py-2 text-sm text-zinc-900 focus:border-[#194685] focus:outline-none focus:ring-1 focus:ring-[#194685]"
+                  placeholder="e.g. CS-24-101"
                 />
               </div>
 

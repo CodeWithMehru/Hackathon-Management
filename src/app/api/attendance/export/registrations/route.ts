@@ -59,7 +59,7 @@ export async function GET(req: Request) {
 
   const { data, error } = await supabase
     .from("Hackathon_Attendance")
-    .select("name,email,attendance_logs")
+    .select("name,email,college,semester,phone_number,roll_number,attendance_logs")
     .order("name", { ascending: true });
 
   if (error) {
@@ -75,12 +75,25 @@ export async function GET(req: Request) {
       return {
         Name: row.name,
         Email: row.email,
-        "Check-in": formatIstTimestamp(logs.checkin),
-        "Check-out": formatIstTimestamp(logs.checkout),
+        Institution: row.college ?? "",
+        Semester: row.semester ?? "",
+        "Phone Number": row.phone_number ?? "",
+        "Check-in Time": formatIstTimestamp(logs.checkin),
+        "Check-out Time": formatIstTimestamp(logs.checkout),
+        "Roll Number": row.roll_number ?? "",
       };
     });
 
-  const headers = ["Name", "Email", "Check-in", "Check-out"];
+  const headers = [
+    "Name",
+    "Email",
+    "Institution",
+    "Semester",
+    "Phone Number",
+    "Check-in Time",
+    "Check-out Time",
+    "Roll Number",
+  ];
   const csv = toCsv(headers, rows as Array<Record<string, unknown>>);
 
   const safeName = session.replace(/[^\w\-]+/g, "_").slice(0, 80) || "export";

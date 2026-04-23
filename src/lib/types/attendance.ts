@@ -12,6 +12,10 @@ export type HackathonAttendanceRow = {
   id: string;
   name: string;
   email: string;
+  phone_number?: string | null;
+  college?: string | null;
+  semester?: string | null;
+  roll_number?: string | null;
   status: AttendanceStatus;
   attendance_logs: AttendanceLogs;
 };

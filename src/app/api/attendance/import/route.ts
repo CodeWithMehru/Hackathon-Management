@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
-type Row = { name: string; email: string };
+type Row = { name: string; email: string; phone_number?: string | null; college?: string | null; semester?: string | null };
 
 function logSupabaseError(context: string, error: unknown) {
   // Supabase errors usually include: message, code, details, hint
@@ -46,19 +46,27 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No rows provided" }, { status: 400 });
     }
 
-    // Strict contract: backend only accepts {name,email}. Still validate + sanitize here.
-    const cleaned: Array<{ name: string; email: string; status: "Registered" }> =
+    // Strict contract: validate + sanitize incoming rows.
+    const cleaned: Array<{ name: string; email: string; phone_number?: string | null; college?: string | null; semester?: string | null; status: "Registered" }> =
       [];
 
     const seen = new Set<string>();
     for (const r of rows) {
-      const email = cleanEmail((r as Row | undefined)?.email);
+      const typedR = r as Row | undefined;
+      const email = cleanEmail(typedR?.email);
       if (!email) continue; // skip invalid rows, don't fail whole upload
       if (seen.has(email)) continue;
       seen.add(email);
 
-      const name = cleanName((r as Row | undefined)?.name, email);
-      cleaned.push({ name, email, status: "Registered" });
+      const name = cleanName(typedR?.name, email);
+      cleaned.push({ 
+        name, 
+        email, 
+        phone_number: typedR?.phone_number || null,
+        college: typedR?.college || null,
+        semester: typedR?.semester || null,
+        status: "Registered" 
+      });
       if (cleaned.length >= 5000) break;
     }
 

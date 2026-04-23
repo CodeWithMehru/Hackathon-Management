@@ -14,10 +14,10 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json().catch(() => null);
-    const { name, email } = body || {};
+    const { name, email, college, semester, phone_number, roll_number } = body || {};
 
-    if (!name || !email) {
-      return NextResponse.json({ error: "Name and email are required" }, { status: 400 });
+    if (!name || !email || !college || !semester) {
+      return NextResponse.json({ error: "Name, email, institution, and semester are required" }, { status: 400 });
     }
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -30,6 +30,10 @@ export async function POST(req: Request) {
         {
           name: name.trim(),
           email: email.trim().toLowerCase(),
+          college: college.trim(),
+          semester: semester.trim(),
+          phone_number: phone_number ? phone_number.trim() : null,
+          roll_number: roll_number ? roll_number.trim() : null,
           status: "Registered",
         },
       ]);
